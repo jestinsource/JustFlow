@@ -1,716 +1,849 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angry Birds · Canvas demo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TypeFlow — Typing Speed Test</title>
     <style>
+        /* ----- RESET & BASE ----- */
         * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-        body {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 1.5rem;
+            background: #0a0e1a;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(108, 140, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 90% 80%, rgba(125, 255, 179, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 50%, rgba(20, 30, 60, 0.4) 0%, transparent 80%);
         }
-        .game-wrapper {
-            background: #7ec8e0;
-            padding: 20px 20px 25px;
-            border-radius: 48px 48px 32px 32px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.3);
+
+        /* ----- MAIN CARD ----- */
+        .app-card {
+            background: rgba(16, 22, 42, 0.75);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border-radius: 3rem;
+            padding: 2.8rem 3.2rem;
+            max-width: 860px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+                0 0 60px rgba(108, 140, 255, 0.03);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        canvas {
-            display: block;
-            width: 900px;
-            height: 500px;
-            border-radius: 28px;
-            box-shadow: inset 0 0 0 3px #3d2b1a, inset 0 0 0 8px #6b4f32, 0 12px 28px rgba(0,0,0,0.7);
-            background: #b3e1f0;
-            cursor: crosshair;
-            margin-bottom: 12px;
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(108, 140, 255, 0.03), transparent 60%);
+            pointer-events: none;
         }
-        .ui-panel {
+
+        /* ----- HEADER ----- */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 12px;
+            margin-bottom: 2.2rem;
+            position: relative;
+            z-index: 1;
         }
-        .score-box {
-            background: #2d1f0e;
-            padding: 8px 24px;
-            border-radius: 60px;
-            color: #f9e7b3;
-            font-weight: 700;
-            font-size: 1.6rem;
-            letter-spacing: 1px;
-            box-shadow: inset 0 -3px 0 #6b4f2e, 0 6px 0 #1f140a;
-            border: 1px solid #b68b5a;
-        }
-        .controls {
+
+        .logo {
             display: flex;
-            gap: 14px;
-        }
-        button {
-            background: #f6c45e;
-            border: none;
-            font-size: 1.2rem;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.7rem;
             font-weight: 700;
-            padding: 8px 28px;
-            border-radius: 60px;
-            color: #2d1f0e;
-            box-shadow: 0 7px 0 #a77b3a, 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: 0.05s linear;
-            letter-spacing: 0.5px;
-            border: 1px solid #fde3a5;
+            color: #e8edff;
+            letter-spacing: -0.5px;
         }
-        button:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 #a77b3a;
+
+        .logo-icon {
+            font-size: 1.9rem;
+            filter: drop-shadow(0 0 12px rgba(108, 140, 255, 0.3));
         }
-        button.reset-btn {
-            background: #d98c7a;
-            box-shadow: 0 7px 0 #9f5f4b;
-            color: #2a1a12;
-            border-color: #f2bcad;
+
+        .logo span {
+            background: linear-gradient(135deg, #6c8cff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .hint {
-            color: #f5f1d7;
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            background: rgba(10, 14, 30, 0.5);
+            padding: 0.5rem 1.8rem;
+            border-radius: 4rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-icon {
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+        .stat-label {
+            color: #7a89b5;
+            font-size: 0.65rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .stat-value {
+            color: #f0f4ff;
+            font-size: 1.25rem;
+            font-weight: 700;
+            min-width: 2.6rem;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(135deg, #e8edff, #b8c8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ----- TEXT DISPLAY ----- */
+        .text-display {
+            background: rgba(8, 12, 28, 0.6);
+            border-radius: 1.8rem;
+            padding: 2rem 2.2rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow:
+                inset 0 4px 20px rgba(0, 0, 0, 0.5),
+                0 8px 32px rgba(0, 0, 0, 0.2);
+            min-height: 110px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-display:focus-within {
+            border-color: rgba(108, 140, 255, 0.2);
+        }
+
+        #textToType {
+            font-size: 1.5rem;
+            font-weight: 400;
+            line-height: 2.2rem;
+            color: #5a6a92;
+            letter-spacing: 0.3px;
+            word-break: break-word;
+            font-family: 'Inter', 'Segoe UI', monospace;
+        }
+
+        #textToType .correct {
+            color: #7dffb3;
+            text-shadow: 0 0 20px rgba(125, 255, 179, 0.15);
+            background: rgba(125, 255, 179, 0.06);
+            border-radius: 2px;
+            padding: 0 1px;
+        }
+
+        #textToType .incorrect {
+            color: #ff7a7a;
+            text-shadow: 0 0 20px rgba(255, 122, 122, 0.15);
+            background: rgba(255, 122, 122, 0.08);
+            border-radius: 2px;
+            padding: 0 1px;
+        }
+
+        #textToType .current {
+            border-bottom: 3px solid #6c8cff;
+            padding-bottom: 1px;
+            animation: cursorPulse 1s ease-in-out infinite;
+            color: #c8d4ff;
+        }
+
+        @keyframes cursorPulse {
+            0%,
+            100% {
+                border-color: #6c8cff;
+                opacity: 1;
+            }
+            50% {
+                border-color: rgba(108, 140, 255, 0.2);
+                opacity: 0.6;
+            }
+        }
+
+        /* ----- INPUT AREA ----- */
+        .input-area {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        #userInput {
+            flex: 1;
+            background: rgba(8, 12, 28, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            border-radius: 3rem;
+            padding: 1rem 2rem;
+            font-size: 1.05rem;
+            color: #e8edff;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            font-family: 'Inter', 'Segoe UI', monospace;
+            backdrop-filter: blur(8px);
+        }
+
+        #userInput::placeholder {
+            color: #3a4a72;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        #userInput:focus {
+            border-color: rgba(108, 140, 255, 0.4);
+            box-shadow: 0 0 0 6px rgba(108, 140, 255, 0.06), 0 0 40px rgba(108, 140, 255, 0.03);
+            background: rgba(8, 12, 28, 0.9);
+        }
+
+        #userInput:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn {
+            background: rgba(20, 28, 56, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 3rem;
+            padding: 1rem 2.2rem;
             font-weight: 600;
-            font-size: 1rem;
-            background: #1f3d4b;
-            padding: 6px 20px;
-            border-radius: 40px;
-            box-shadow: inset 0 2px 4px #a0c6d6;
+            font-size: 0.95rem;
+            color: #b0c0ee;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            min-width: 120px;
+            backdrop-filter: blur(8px);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            letter-spacing: 0.2px;
         }
-        @media (max-width: 940px) {
-            canvas { width: 100%; height: auto; aspect-ratio: 900/500; }
-            .game-wrapper { padding: 12px; }
-            .score-box { font-size: 1.2rem; padding: 4px 16px; }
-            button { font-size: 1rem; padding: 6px 18px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6c8cff, #7c6cff);
+            color: #0a0e1a;
+            border: none;
+            font-weight: 700;
+            box-shadow: 0 4px 24px rgba(108, 140, 255, 0.25);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(108, 140, 255, 0.35);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: rgba(20, 28, 56, 0.5);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(40, 52, 90, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        .btn .btn-icon {
+            font-size: 1.1rem;
+        }
+
+        /* ----- RESULT SECTION ----- */
+        .result-area {
+            background: rgba(8, 12, 28, 0.4);
+            border-radius: 1.8rem;
+            padding: 1.4rem 2rem;
+            margin-top: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            position: relative;
+            z-index: 1;
+            min-height: 76px;
+            transition: all 0.4s ease;
+        }
+
+        .result-area.has-results {
+            border-color: rgba(108, 140, 255, 0.1);
+            background: rgba(8, 12, 28, 0.6);
+        }
+
+        .result-message {
+            font-size: 0.95rem;
+            color: #8899c8;
+            font-weight: 450;
+            letter-spacing: 0.2px;
+        }
+
+        .result-message strong {
+            color: #e8edff;
+            font-weight: 600;
+        }
+
+        .result-message .highlight {
+            background: linear-gradient(135deg, #6c8cff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-details {
+            display: flex;
+            gap: 2.2rem;
+        }
+
+        .result-detail-item {
+            text-align: center;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .result-detail-item .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .result-detail-item .value.wpm {
+            background: linear-gradient(135deg, #ffd966, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-detail-item .value.accuracy {
+            background: linear-gradient(135deg, #7dffb3, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-detail-item .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: #5a6a92;
+            letter-spacing: 0.8px;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ----- ANIMATED GLOW ORB ----- */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-orb-1 {
+            width: 300px;
+            height: 300px;
+            top: -120px;
+            right: -80px;
+            background: rgba(108, 140, 255, 0.06);
+        }
+
+        .glow-orb-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -60px;
+            left: -60px;
+            background: rgba(125, 255, 179, 0.04);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 700px) {
+            .app-card {
+                padding: 1.8rem 1.5rem;
+                border-radius: 2rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .logo {
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .stats {
+                justify-content: space-around;
+                padding: 0.5rem 1rem;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .stat-item {
+                flex-direction: column;
+                gap: 0.1rem;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+                min-width: 2rem;
+            }
+
+            .text-display {
+                padding: 1.2rem 1.2rem;
+                min-height: 80px;
+                border-radius: 1.2rem;
+            }
+
+            #textToType {
+                font-size: 1.1rem;
+                line-height: 1.8rem;
+            }
+
+            .input-area {
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+
+            #userInput {
+                width: 100%;
+                text-align: center;
+                padding: 0.9rem 1.2rem;
+                font-size: 0.95rem;
+            }
+
+            .btn {
+                width: 100%;
+                min-width: unset;
+                padding: 0.9rem 1.2rem;
+            }
+
+            .result-area {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+                padding: 1.2rem 1.2rem;
+                gap: 0.6rem;
+            }
+
+            .result-details {
+                justify-content: space-around;
+                gap: 1rem;
+            }
+
+            .result-detail-item .value {
+                font-size: 1.3rem;
+            }
+
+            .glow-orb-1,
+            .glow-orb-2 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .app-card {
+                padding: 1.2rem 0.8rem;
+                border-radius: 1.5rem;
+            }
+
+            #textToType {
+                font-size: 0.95rem;
+                line-height: 1.6rem;
+            }
+
+            .stats {
+                flex-wrap: wrap;
+                gap: 0.3rem;
+            }
+
+            .stat-item {
+                flex: 1;
+                min-width: 60px;
+            }
+        }
+
+        /* ----- SCROLLBAR ----- */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(108, 140, 255, 0.3);
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-<div class="game-wrapper">
-    <canvas id="gameCanvas" width="900" height="500"></canvas>
-    <div class="ui-panel">
-        <div class="score-box">🏆 <span id="scoreDisplay">0</span></div>
-        <div class="controls">
-            <span class="hint">🖱️ drag bird → release</span>
-            <button id="resetBtn" class="reset-btn">⟳ new round</button>
+
+    <div class="app-card">
+        <!-- Glow Orbs -->
+        <div class="glow-orb glow-orb-1"></div>
+        <div class="glow-orb glow-orb-2"></div>
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">
+                <span class="logo-icon">⌨️</span>
+                <span>Type</span>Flow
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-icon">⏱️</span>
+                    <span class="stat-label">Time</span>
+                    <span class="stat-value" id="timerDisplay">60</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">⌨️</span>
+                    <span class="stat-label">Chars</span>
+                    <span class="stat-value" id="charCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEXT DISPLAY -->
+        <div class="text-display">
+            <div id="textToType">✨ Click <strong style="color:#6c8cff;">Start</strong> to begin your flow.</div>
+        </div>
+
+        <!-- INPUT + BUTTONS -->
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type here..." disabled autofocus />
+            <button class="btn btn-primary" id="startBtn">
+                <span class="btn-icon">▶</span> Start
+            </button>
+            <button class="btn btn-secondary" id="resetBtn">
+                <span class="btn-icon">⟳</span> Reset
+            </button>
+        </div>
+
+        <!-- RESULT AREA -->
+        <div class="result-area" id="resultArea">
+            <div class="result-message" id="resultMessage">
+                🌊 Ready to flow with your typing?
+            </div>
+            <div class="result-details" id="resultDetails">
+                <div class="result-detail-item">
+                    <div class="value wpm" id="wpmResult">0</div>
+                    <div class="label">WPM</div>
+                </div>
+                <div class="result-detail-item">
+                    <div class="value accuracy" id="accuracyResult">0%</div>
+                    <div class="label">Accuracy</div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<script>
-    (function() {
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreSpan = document.getElementById('scoreDisplay');
 
-        // ----- dimensions & constants -----
-        const W = 900, H = 500;
-        const GRAVITY = 0.45;
-        const GROUND_Y = 460;          // top of ground
-        const SLING_X = 140, SLING_Y = 360;
-        const SLING_RADIUS = 18;
+    <script>
+        // ============================================================
+        //  TYPEFLOW — Full JavaScript
+        // ============================================================
 
-        // ----- game state -----
-        let birds = [];
-        let pigs = [];
-        let blocks = [];          // wooden blocks (static obstacles)
-        let particles = [];
-        let score = 0;
+        // ----- SENTENCE BANK (more poetic & varied) -----
+        const SENTENCES = [
+            "The quiet hum of morning light spills across the waking earth.",
+            "Every keystroke is a step toward mastery of your craft.",
+            "Between the notes of silence, music finds its voice.",
+            "To type is to dance with thought, each letter a gentle step.",
+            "The horizon glows with the promise of a brand new day.",
+            "In the realm of words, speed and grace become one.",
+            "A steady rhythm turns chaos into a symphony of order.",
+            "The mind imagines, the fingers follow, and magic unfolds.",
+            "Typing is not mere motion, it is the poetry of intention.",
+            "With patience and practice, even the impossible grows near.",
+            "The stars above are not so distant as the dreams within.",
+            "Let your fingers flow like water over ancient stones.",
+            "Every mistake is a lesson wrapped in a gentle nudge.",
+            "Speed is the child of accuracy, born from quiet focus.",
+            "The screen glows, a portal to worlds yet to be written.",
+            "Breathe, focus, and let your thoughts take flight.",
+            "A single word can change the current of an entire day.",
+            "The journey of a thousand miles begins with a single key.",
+            "Typing fast is a dance, typing well is a masterpiece.",
+            "The future belongs to those who can shape it with their hands."
+        ];
 
-        // slingshot / aiming
-        let currentBird = null;         // { x, y, vx, vy, radius, active }
-        let isDragging = false;
-        let dragStart = { x: 0, y: 0 };
-        let dragEnd = { x: 0, y: 0 };
+        // ----- DOM REFS -----
+        const textToTypeEl = document.getElementById('textToType');
+        const userInput = document.getElementById('userInput');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const charCount = document.getElementById('charCount');
+        const resultMessage = document.getElementById('resultMessage');
+        const wpmResult = document.getElementById('wpmResult');
+        const accuracyResult = document.getElementById('accuracyResult');
+        const resultArea = document.getElementById('resultArea');
 
-        // physics & game loop
-        let animationId = null;
-        let gameActive = true;
+        // ----- STATE -----
+        let targetText = '';
+        let isRunning = false;
+        let isFinished = false;
+        let timer = 60;
+        let timerInterval = null;
+        let totalCorrectChars = 0;
+        let totalTypedChars = 0;
 
-        // ----- helper functions -----
-        function resetGame() {
-            // clear everything
-            birds = [];
-            pigs = [];
-            blocks = [];
-            particles = [];
-            gameActive = true;
+        // ----- HELPERS -----
 
-            // --- build level ---
-
-            // 1) pigs (3 little piggies)
-            pigs.push({ x: 730, y: GROUND_Y - 22, radius: 22, hp: 1, alive: true });
-            pigs.push({ x: 780, y: GROUND_Y - 22, radius: 22, hp: 1, alive: true });
-            pigs.push({ x: 830, y: GROUND_Y - 22, radius: 22, hp: 1, alive: true });
-
-            // 2) wooden blocks (structures)
-            // left tower
-            blocks.push({ x: 700, y: GROUND_Y - 22, w: 30, h: 50, hp: 2 });
-            blocks.push({ x: 730, y: GROUND_Y - 22, w: 30, h: 50, hp: 2 });
-            blocks.push({ x: 715, y: GROUND_Y - 56, w: 60, h: 16, hp: 2 });
-            // right tower
-            blocks.push({ x: 790, y: GROUND_Y - 22, w: 30, h: 50, hp: 2 });
-            blocks.push({ x: 820, y: GROUND_Y - 22, w: 30, h: 50, hp: 2 });
-            blocks.push({ x: 805, y: GROUND_Y - 56, w: 60, h: 16, hp: 2 });
-            // middle wall
-            blocks.push({ x: 760, y: GROUND_Y - 18, w: 20, h: 38, hp: 2 });
-            blocks.push({ x: 760, y: GROUND_Y - 46, w: 40, h: 12, hp: 2 });
-
-            // 3) birds (ammo) – initial 3 birds
-            birds.push({ x: 50, y: GROUND_Y - 18, radius: 18, vx: 0, vy: 0, active: false });
-            birds.push({ x: 90, y: GROUND_Y - 18, radius: 18, vx: 0, vy: 0, active: false });
-            birds.push({ x: 130, y: GROUND_Y - 18, radius: 18, vx: 0, vy: 0, active: false });
-
-            // place first bird on slingshot
-            loadNextBird();
-
-            updateScoreDisplay();
+        function getRandomSentence() {
+            return SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
         }
 
-        // load next bird from queue to slingshot
-        function loadNextBird() {
-            // find first inactive bird
-            for (let bird of birds) {
-                if (!bird.active) {
-                    // place on slingshot
-                    bird.x = SLING_X;
-                    bird.y = SLING_Y;
-                    bird.vx = 0;
-                    bird.vy = 0;
-                    bird.active = true;
-                    currentBird = bird;
-                    return;
-                }
-            }
-            // no more birds : game over state (no active bird)
-            currentBird = null;
-            gameActive = false;
-        }
+        function renderText(userInputStr = '') {
+            let html = '';
+            const target = targetText;
+            const inputLen = userInputStr.length;
 
-        // ----- physics & collision -----
-        function circleRectCollision(circle, rect) {
-            // rect = { x, y, w, h }  (center)
-            const halfW = rect.w/2, halfH = rect.h/2;
-            const dx = Math.abs(circle.x - rect.x);
-            const dy = Math.abs(circle.y - rect.y);
-            if (dx > halfW + circle.radius) return false;
-            if (dy > halfH + circle.radius) return false;
-            if (dx <= halfW || dy <= halfH) return true; // overlap
-            // corner distance
-            const cornerDist = (dx - halfW) ** 2 + (dy - halfH) ** 2;
-            return cornerDist <= circle.radius ** 2;
-        }
+            for (let i = 0; i < target.length; i++) {
+                const targetChar = target[i];
+                let charHtml = '';
 
-        function circleCircleCollision(a, b) {
-            const dx = a.x - b.x;
-            const dy = a.y - b.y;
-            const dist = Math.hypot(dx, dy);
-            return dist < a.radius + b.radius;
-        }
-
-        function resolveCircleCircle(a, b) {
-            const dx = a.x - b.x;
-            const dy = a.y - b.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist === 0) return;
-            const overlap = (a.radius + b.radius - dist) / 2;
-            const nx = dx / dist;
-            const ny = dy / dist;
-            a.x += nx * overlap;
-            a.y += ny * overlap;
-            b.x -= nx * overlap;
-            b.y -= ny * overlap;
-        }
-
-        // damage and destroy objects
-        function damagePig(pig) {
-            pig.hp -= 1;
-            if (pig.hp <= 0) {
-                pig.alive = false;
-                score += 500;
-                spawnParticles(pig.x, pig.y, '#b3d95a', 16);
-                updateScoreDisplay();
-            }
-        }
-
-        function damageBlock(block) {
-            block.hp -= 1;
-            if (block.hp <= 0) {
-                // remove block (mark as destroyed)
-                block.destroyed = true;
-                spawnParticles(block.x, block.y, '#c68a4a', 10);
-            }
-        }
-
-        function spawnParticles(x, y, color, count = 12) {
-            for (let i=0; i<count; i++) {
-                const angle = Math.random() * 2 * Math.PI;
-                const speed = 2 + Math.random() * 6;
-                particles.push({
-                    x, y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed - 2,
-                    life: 1.0,
-                    decay: 0.015 + Math.random() * 0.025,
-                    radius: 3 + Math.random() * 5,
-                    color: color,
-                });
-            }
-        }
-
-        // ----- update physics step -----
-        function physicsUpdate() {
-            if (!gameActive) return;
-
-            // 1) move active bird (projectile)
-            if (currentBird && currentBird.active) {
-                const b = currentBird;
-                b.vy += GRAVITY;
-                b.x += b.vx;
-                b.y += b.vy;
-
-                // ground collision
-                if (b.y + b.radius > GROUND_Y) {
-                    b.y = GROUND_Y - b.radius;
-                    b.vy *= -0.35;
-                    b.vx *= 0.85;
-                    if (Math.abs(b.vy) < 0.8) b.vy = 0;
-                }
-                // wall bounce (left/right)
-                if (b.x - b.radius < 0) { b.x = b.radius; b.vx *= -0.4; }
-                if (b.x + b.radius > W) { b.x = W - b.radius; b.vx *= -0.4; }
-
-                // if bird is very still and on ground -> deactivate
-                if (Math.abs(b.vy) < 0.2 && Math.abs(b.vx) < 0.2 && b.y + b.radius >= GROUND_Y - 2) {
-                    b.active = false;
-                    b.vx = 0; b.vy = 0;
-                    // spawn some particles for landing
-                    spawnParticles(b.x, GROUND_Y, '#d4a373', 6);
-                    // load next bird after short delay (handled in loop by checking)
-                }
-
-                // collision with pigs
-                for (let pig of pigs) {
-                    if (!pig.alive) continue;
-                    if (circleCircleCollision(b, pig)) {
-                        // knockback & damage
-                        const dx = b.x - pig.x;
-                        const dy = b.y - pig.y;
-                        const dist = Math.hypot(dx, dy) || 1;
-                        const force = Math.min(12, Math.hypot(b.vx, b.vy) * 0.6);
-                        pig.x -= (dx / dist) * force;
-                        pig.y -= (dy / dist) * force - 2;
-                        damagePig(pig);
-                        // bounce bird
-                        b.vx *= 0.3;
-                        b.vy *= 0.3;
-                        resolveCircleCircle(b, pig);
+                if (i < inputLen) {
+                    const userChar = userInputStr[i];
+                    if (userChar === targetChar) {
+                        charHtml = `<span class="correct">${targetChar}</span>`;
+                    } else {
+                        charHtml = `<span class="incorrect">${targetChar}</span>`;
                     }
+                } else if (i === inputLen && !isFinished) {
+                    charHtml = `<span class="current">${targetChar}</span>`;
+                } else {
+                    charHtml = targetChar;
                 }
-
-                // collision with blocks
-                for (let block of blocks) {
-                    if (block.destroyed) continue;
-                    if (circleRectCollision(b, block)) {
-                        // simple push and damage
-                        const dx = b.x - block.x;
-                        const dy = b.y - block.y;
-                        const angle = Math.atan2(dy, dx);
-                        const overlap = 6;
-                        b.x += Math.cos(angle) * overlap;
-                        b.y += Math.sin(angle) * overlap;
-                        // damage block if bird speed > threshold
-                        const speed = Math.hypot(b.vx, b.vy);
-                        if (speed > 1.2) {
-                            damageBlock(block);
-                        }
-                        b.vx *= 0.2;
-                        b.vy *= 0.2;
-                    }
-                }
-
-                // deactivate if bird goes too far (off screen)
-                if (b.x > W + 60 || b.x < -60 || b.y > H + 60) {
-                    b.active = false;
-                }
+                html += charHtml;
             }
-
-            // 2) handle pigs & blocks (gravity for pigs if floating)
-            for (let pig of pigs) {
-                if (!pig.alive) continue;
-                // keep pig on ground (simple)
-                if (pig.y + pig.radius > GROUND_Y) {
-                    pig.y = GROUND_Y - pig.radius;
-                }
-                // check collision with blocks (push pigs aside)
-                for (let block of blocks) {
-                    if (block.destroyed) continue;
-                    if (circleRectCollision(pig, block)) {
-                        const dx = pig.x - block.x;
-                        const dy = pig.y - block.y;
-                        const angle = Math.atan2(dy, dx);
-                        pig.x += Math.cos(angle) * 3;
-                        pig.y += Math.sin(angle) * 3;
-                        if (pig.y + pig.radius > GROUND_Y) pig.y = GROUND_Y - pig.radius;
-                    }
-                }
-            }
-
-            // 3) remove destroyed blocks & pigs
-            blocks = blocks.filter(b => !b.destroyed);
-            pigs = pigs.filter(p => p.alive);
-
-            // 4) update particles
-            for (let p of particles) {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.08;
-                p.life -= p.decay;
-            }
-            particles = particles.filter(p => p.life > 0);
-
-            // 5) check if current bird is inactive -> load next
-            if (currentBird && !currentBird.active) {
-                loadNextBird();
-            }
-
-            // 6) win/lose condition: if no pigs left -> win!
-            if (pigs.length === 0 && gameActive) {
-                gameActive = false;
-                // bonus score
-                score += 1000;
-                updateScoreDisplay();
-                // celebration particles
-                for (let i=0; i<30; i++) {
-                    spawnParticles(300 + Math.random()*300, 150 + Math.random()*150, '#f6d365', 20);
-                }
-            }
-
-            // if no active bird and no pigs left, game over (win already set)
-            if (!currentBird && pigs.length > 0 && birds.every(b => !b.active)) {
-                gameActive = false;
-                // sad trombone :(
-            }
-
-            updateScoreDisplay();
+            textToTypeEl.innerHTML = html;
         }
 
-        // ----- rendering -----
-        function draw() {
-            ctx.clearRect(0, 0, W, H);
-
-            // sky gradient
-            const sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-            sky.addColorStop(0, '#9acfeb');
-            sky.addColorStop(0.7, '#c2e5f5');
-            ctx.fillStyle = sky;
-            ctx.fillRect(0, 0, W, GROUND_Y);
-
-            // ground
-            ctx.fillStyle = '#6b8f3a';
-            ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-            ctx.fillStyle = '#4e6b2b';
-            ctx.fillRect(0, GROUND_Y, W, 6);
-            // grass details
-            ctx.fillStyle = '#7da34a';
-            for (let i=0; i<W; i+=18) {
-                ctx.beginPath();
-                ctx.moveTo(i, GROUND_Y);
-                ctx.lineTo(i+6, GROUND_Y-12);
-                ctx.lineTo(i+12, GROUND_Y);
-                ctx.fill();
-            }
-
-            // ----- draw blocks -----
-            for (let block of blocks) {
-                if (block.destroyed) continue;
-                ctx.fillStyle = '#c68a4a';
-                ctx.shadowColor = '#3d2b1a';
-                ctx.shadowBlur = 8;
-                ctx.fillRect(block.x - block.w/2, block.y - block.h/2, block.w, block.h);
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#6b4f32';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(block.x - block.w/2, block.y - block.h/2, block.w, block.h);
-                // wood grain
-                ctx.strokeStyle = '#8b6b44';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(block.x - block.w/3, block.y - block.h/3);
-                ctx.lineTo(block.x + block.w/3, block.y - block.h/3);
-                ctx.stroke();
-            }
-
-            // ----- draw pigs -----
-            for (let pig of pigs) {
-                if (!pig.alive) continue;
-                ctx.shadowBlur = 14;
-                ctx.shadowColor = '#1d3b1a';
-                // body
-                ctx.beginPath();
-                ctx.ellipse(pig.x, pig.y, pig.radius, pig.radius*0.95, 0, 0, Math.PI*2);
-                ctx.fillStyle = '#7ec87e';
-                ctx.fill();
-                ctx.fillStyle = '#5f9e5f';
-                ctx.beginPath();
-                ctx.ellipse(pig.x-5, pig.y-6, 5, 6, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(pig.x+5, pig.y-6, 5, 6, 0, 0, Math.PI*2);
-                ctx.fill();
-                // eyes
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(pig.x-8, pig.y-8, 6, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(pig.x+8, pig.y-8, 6, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#1f2a1a';
-                ctx.beginPath();
-                ctx.arc(pig.x-10, pig.y-10, 3, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(pig.x+6, pig.y-10, 3, 0, Math.PI*2);
-                ctx.fill();
-                // nose
-                ctx.fillStyle = '#4f7a4f';
-                ctx.beginPath();
-                ctx.ellipse(pig.x, pig.y+2, 5, 4, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#3d5e3d';
-                ctx.beginPath();
-                ctx.arc(pig.x-3, pig.y+2, 2, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(pig.x+3, pig.y+2, 2, 0, Math.PI*2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            }
-
-            // ----- draw birds (including current) -----
-            for (let bird of birds) {
-                if (!bird.active && bird !== currentBird) continue;
-                ctx.shadowBlur = 16;
-                ctx.shadowColor = '#222';
-                ctx.beginPath();
-                ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI*2);
-                // red bird
-                const gradient = ctx.createRadialGradient(bird.x-6, bird.y-6, 4, bird.x, bird.y, bird.radius);
-                gradient.addColorStop(0, '#f05a5a');
-                gradient.addColorStop(0.7, '#b12a2a');
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                ctx.strokeStyle = '#6a1a1a';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                // eyes
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(bird.x-7, bird.y-5, 5, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(bird.x+7, bird.y-5, 5, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#1f1f1f';
-                ctx.beginPath();
-                ctx.arc(bird.x-9, bird.y-7, 2.5, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(bird.x+5, bird.y-7, 2.5, 0, Math.PI*2);
-                ctx.fill();
-                // beak
-                ctx.fillStyle = '#f5a623';
-                ctx.beginPath();
-                ctx.moveTo(bird.x+12, bird.y-2);
-                ctx.lineTo(bird.x+22, bird.y+1);
-                ctx.lineTo(bird.x+12, bird.y+6);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            }
-
-            // ----- slingshot -----
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#2b1d0e';
-            ctx.fillStyle = '#5d3a1a';
-            ctx.beginPath();
-            ctx.ellipse(SLING_X-10, SLING_Y+10, 12, 20, 0.2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(SLING_X+10, SLING_Y+10, 12, 20, -0.2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = '#3d2612';
-            ctx.beginPath();
-            ctx.ellipse(SLING_X, SLING_Y-4, 8, 12, 0, 0, Math.PI*2);
-            ctx.fill();
-
-            // draw rubber band if dragging
-            if (isDragging && currentBird) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#322011';
-                ctx.lineWidth = 8;
-                ctx.lineCap = 'round';
-                ctx.moveTo(SLING_X-10, SLING_Y+10);
-                ctx.lineTo(currentBird.x, currentBird.y);
-                ctx.lineTo(SLING_X+10, SLING_Y+10);
-                ctx.stroke();
-                ctx.strokeStyle = '#4d2f17';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(SLING_X-10, SLING_Y+10);
-                ctx.lineTo(currentBird.x, currentBird.y);
-                ctx.lineTo(SLING_X+10, SLING_Y+10);
-                ctx.stroke();
-            }
-
-            // ----- particles -----
-            for (let p of particles) {
-                ctx.globalAlpha = p.life;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius * p.life, 0, Math.PI*2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
-            ctx.shadowBlur = 0;
-
-            // debug / UI text
-            ctx.fillStyle = '#1f2f1a';
-            ctx.font = 'bold 14px "Segoe UI", sans-serif';
-            ctx.fillText(`pigs: ${pigs.length}  |  birds left: ${birds.filter(b => !b.active).length}`, 20, 30);
-            if (!gameActive && pigs.length === 0) {
-                ctx.fillStyle = '#f5e56b';
-                ctx.font = 'bold 38px sans-serif';
-                ctx.shadowColor = '#1a2a0a';
-                ctx.shadowBlur = 20;
-                ctx.fillText('✨ WINNER!', 360, 160);
-            } else if (!gameActive && pigs.length > 0) {
-                ctx.fillStyle = '#d9b08c';
-                ctx.font = 'bold 34px sans-serif';
-                ctx.shadowColor = '#1a1a1a';
-                ctx.shadowBlur = 18;
-                ctx.fillText('😤  try again', 340, 160);
-            }
-            ctx.shadowBlur = 0;
+        function updateStats() {
+            timerDisplay.textContent = Math.ceil(timer);
+            charCount.textContent = totalTypedChars;
         }
 
-        // ----- game loop -----
-        function loop() {
-            physicsUpdate();
-            draw();
-            animationId = requestAnimationFrame(loop);
+        function calculateResults() {
+            const minutes = (60 - timer) / 60;
+            const wpm = minutes > 0 ? Math.round((totalCorrectChars / 5) / minutes) : 0;
+            const accuracy = totalTypedChars > 0 ? Math.round((totalCorrectChars / totalTypedChars) * 100) : 100;
+            return { wpm, accuracy };
         }
 
-        // ----- mouse events -----
-        function getMousePos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
-            const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
-            return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
-            };
-        }
+        function showResults() {
+            const { wpm, accuracy } = calculateResults();
+            wpmResult.textContent = wpm;
+            accuracyResult.textContent = accuracy + '%';
+            resultArea.classList.add('has-results');
 
-        function onMouseDown(e) {
-            e.preventDefault();
-            if (!gameActive || !currentBird) return;
-            const pos = getMousePos(e);
-            const dx = pos.x - currentBird.x;
-            const dy = pos.y - currentBird.y;
-            if (Math.hypot(dx, dy) < 40) {
-                isDragging = true;
-                dragStart = { x: currentBird.x, y: currentBird.y };
-                dragEnd = { x: pos.x, y: pos.y };
+            let emoji = '🌟';
+            let msg = '';
+            if (wpm >= 70 && accuracy >= 95) {
+                emoji = '🏆';
+                msg = 'Exceptional flow! You\'re a typing virtuoso.';
+            } else if (wpm >= 50 && accuracy >= 90) {
+                emoji = '🔥';
+                msg = 'Great rhythm! You\'re building serious momentum.';
+            } else if (wpm >= 35) {
+                emoji = '🌊';
+                msg = 'Steady flow! Keep practicing to ride the wave.';
+            } else {
+                emoji = '🌱';
+                msg = 'Every master starts somewhere. Keep going!';
             }
+            resultMessage.innerHTML =
+                `${emoji} ${msg} <strong>${totalCorrectChars}</strong> correct chars.`;
         }
 
-        function onMouseMove(e) {
-            e.preventDefault();
-            if (!isDragging || !currentBird) return;
-            const pos = getMousePos(e);
-            // limit drag distance
-            let dx = pos.x - SLING_X;
-            let dy = pos.y - SLING_Y;
-            const dist = Math.hypot(dx, dy);
-            const maxDist = 70;
-            if (dist > maxDist) {
-                dx = dx / dist * maxDist;
-                dy = dy / dist * maxDist;
+        // ----- CORE LOGIC -----
+
+        function startTest() {
+            if (isRunning) return;
+            if (isFinished) resetTest();
+
+            if (!targetText) {
+                targetText = getRandomSentence();
+                renderText('');
             }
-            currentBird.x = SLING_X + dx;
-            currentBird.y = SLING_Y + dy;
-            dragEnd = { x: currentBird.x, y: currentBird.y };
+
+            isRunning = true;
+            isFinished = false;
+            timer = 60;
+            totalCorrectChars = 0;
+            totalTypedChars = 0;
+
+            userInput.disabled = false;
+            userInput.value = '';
+            userInput.focus();
+
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="btn-icon">⏳</span> Flowing...';
+
+            resultMessage.textContent = '⏱️ Type the text above. Timer is running!';
+            resultArea.classList.remove('has-results');
+            wpmResult.textContent = '0';
+            accuracyResult.textContent = '0%';
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer -= 0.1;
+                if (timer <= 0) {
+                    timer = 0;
+                    finishTest();
+                }
+                updateStats();
+            }, 100);
+
+            updateStats();
+            renderText('');
         }
 
-        function onMouseUp(e) {
-            e.preventDefault();
-            if (!isDragging || !currentBird) {
-                isDragging = false;
+        function finishTest() {
+            if (!isRunning) return;
+
+            isRunning = false;
+            isFinished = true;
+            clearInterval(timerInterval);
+            timerInterval = null;
+
+            userInput.disabled = true;
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<span class="btn-icon">▶</span> Start';
+
+            renderText(userInput.value);
+            showResults();
+            updateStats();
+        }
+
+        function resetTest() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            isFinished = false;
+            targetText = '';
+            timer = 60;
+            totalCorrectChars = 0;
+            totalTypedChars = 0;
+
+            userInput.disabled = true;
+            userInput.value = '';
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<span class="btn-icon">▶</span> Start';
+
+            textToTypeEl.innerHTML = '✨ Click <strong style="color:#6c8cff;">Start</strong> to begin your flow.';
+            timerDisplay.textContent = '60';
+            charCount.textContent = '0';
+            wpmResult.textContent = '0';
+            accuracyResult.textContent = '0%';
+            resultMessage.textContent = '🌊 Ready to flow with your typing?';
+            resultArea.classList.remove('has-results');
+        }
+
+        function handleUserInput(e) {
+            if (!isRunning || isFinished) return;
+
+            const inputValue = e.target.value;
+            const target = targetText;
+
+            if (inputValue.length > target.length) {
+                userInput.value = inputValue.slice(0, target.length);
                 return;
             }
-            isDragging = false;
-            // release bird with velocity
-            const dx = SLING_X - currentBird.x;
-            const dy = SLING_Y - currentBird.y;
-            const power = Math.min(22, Math.hypot(dx, dy) * 0.38);
-            const angle = Math.atan2(dy, dx);
-            currentBird.vx = Math.cos(angle) * power;
-            currentBird.vy = Math.sin(angle) * power;
-            // ensure bird is active
-            currentBird.active = true;
-            // reset slingshot position (but bird will fly)
+
+            totalTypedChars = inputValue.length;
+            let correct = 0;
+            for (let i = 0; i < inputValue.length; i++) {
+                if (inputValue[i] === target[i]) correct++;
+            }
+            totalCorrectChars = correct;
+
+            renderText(inputValue);
+
+            if (inputValue.length === target.length) {
+                finishTest();
+            }
+
+            updateStats();
         }
 
-        // ----- attach events -----
-        canvas.addEventListener('mousedown', onMouseDown);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
+        // ----- EVENT LISTENERS -----
 
-        // touch support
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            onMouseDown(e);
-        });
-        window.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            onMouseMove(e);
-        });
-        window.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            onMouseUp(e);
+        startBtn.addEventListener('click', startTest);
+        resetBtn.addEventListener('click', resetTest);
+        userInput.addEventListener('input', handleUserInput);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !isRunning && !isFinished) {
+                startTest();
+            }
+            if (e.key === 'Escape') {
+                resetTest();
+            }
         });
 
-        // reset button
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            resetGame();
-        });
-
-        function updateScoreDisplay() {
-            scoreSpan.textContent = score;
-        }
-
-        // start!
-        resetGame();
-        loop();
-
-        // clean up animation on page unload
-        window.addEventListener('beforeunload', () => {
-            if (animationId) cancelAnimationFrame(animationId);
-        });
-    })();
-</script>
+        // Initial state
+        resetTest();
+    </script>
 </body>
 </html>
